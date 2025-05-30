@@ -39,18 +39,25 @@ app.post("/addtarefa", (req, res) => {
   }
 });
 
-app.put("/tasks/:id", (req, res) => {
+app.put("/atualizartarefa/:id", (req, res) => {
   const { id } = req.params;
-  const { title, completed } = req.body;
-  const task = tasks.find((t) => t.id === parseInt(id));
+  const { titulo, descricao, status, categoriaId } = req.body;
 
-  if (task) {
-    if (completed != undefined) task.completed = completed;
-    if (title) task.title = title;
-    res.json(task);
+  if (titulo || descricao || status || categoriaId) {
+    Tarefas.update({
+      titulo,
+      descricao,
+      status,
+      categoriaId
+    }, {
+      where: { id: id }
+    }).then(() =>{
+      res.status(200).json({ message: "Tarefa atualizada com sucesso" });
+    })
   } else {
-    res.status(404).json({ message: "Task not found" });
+    res.status(404).json({ message: "Tarefa não encontrada" });
   }
+  
 });
 
 app.delete("/tasks/:id", (req, res) => {
