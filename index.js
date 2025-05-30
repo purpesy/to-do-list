@@ -115,6 +115,7 @@ app.post("/addcategoria", (req, res) => {
   }
 });
 
+// Atualiza uma categoria existente
 app.put("/atualizarcategoria/:id", (req, res) => {
   const { id } = req.params;
   const { nomeCategoria } = req.body;
@@ -130,7 +131,20 @@ app.put("/atualizarcategoria/:id", (req, res) => {
   } else {
     res.status(404).json({ message: "Categoria não encontrada" });
   }
+});
 
+// Deleta uma categoria existente
+app.delete("/apagarcategoria/:id", (req, res) => {
+  const { id } = req.params;
+  Categoria.findByPk(id).then((categoria) => {
+    if (categoria) {
+      categoria.destroy().then(() => {
+        res.status(200).json({ message: "Categoria deletada com sucesso" });
+      });
+    } else {
+      res.status(404).json({ message: "Categoria não encontrada" });
+    }
+  });
 });
 
 
