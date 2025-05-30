@@ -40,15 +40,15 @@ app.post("/addtarefa", (req, res) => {
   const { titulo, descricao, status, categoriaId } = req.body;
 
   if (titulo && descricao && status && categoriaId) {
-  Tarefas.create({
-    titulo,
-    descricao,
-    status,
-    categoriaId
-  }).then(() => {
-    res.status(201).json({ message: "Tarefa criada com sucesso" });
-  });
-  } else{
+    Tarefas.create({
+      titulo,
+      descricao,
+      status,
+      categoriaId
+    }).then(() => {
+      res.status(201).json({ message: "Tarefa criada com sucesso" });
+    });
+  } else {
     res.status(400).json({ message: "Todos os campos são obrigatórios" });
   }
 });
@@ -66,13 +66,13 @@ app.put("/atualizartarefa/:id", (req, res) => {
       categoriaId
     }, {
       where: { id: id }
-    }).then(() =>{
+    }).then(() => {
       res.status(200).json({ message: "Tarefa atualizada com sucesso" });
     })
   } else {
     res.status(404).json({ message: "Tarefa não encontrada" });
   }
-  
+
 });
 
 // Deleta uma tarefa existente
@@ -105,17 +105,33 @@ app.post("/addcategoria", (req, res) => {
   const { nomeCategoria } = req.body;
 
   if (nomeCategoria) {
-  Categoria.create({
-    nomeCategoria
-  }).then(() => {
-    res.status(201).json({ message: "Categoria criada com sucesso" });
-  });
-  } else{
+    Categoria.create({
+      nomeCategoria
+    }).then(() => {
+      res.status(201).json({ message: "Categoria criada com sucesso" });
+    });
+  } else {
     res.status(400).json({ message: "Todos os campos são obrigatórios" });
   }
 });
 
+app.put("/atualizarcategoria/:id", (req, res) => {
+  const { id } = req.params;
+  const { nomeCategoria } = req.body;
 
+  if (nomeCategoria) {
+    Categoria.update({
+      nomeCategoria
+    }, {
+      where: { id: id }
+    }).then(() => {
+      res.status(200).json({ message: "Categoria atualizada com sucesso" });
+    })
+  } else {
+    res.status(404).json({ message: "Categoria não encontrada" });
+  }
+
+});
 
 
 app.listen(PORT, () => {
