@@ -14,6 +14,10 @@ const Tarefas = connection.define("tarefas", {
     type: Sequelize.ENUM("pendente", "em_andamento", "concluido"),
     allowNull: false,
   },
+  categoriaId: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  },
 });
 
 Tarefas.sync({ force: false }).then(() => {

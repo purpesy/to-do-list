@@ -4,6 +4,7 @@ const PORT = 8080;
 const cors = require("cors");
 const connection = require("./database/Conexao");
 const Tarefas = require("./database/Tarefas");
+const Categoria = require("./database/Categoria");
 
 connection.authenticate().then(() => {
   console.log("Conexão com o banco de dados realizada com sucesso!");
