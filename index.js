@@ -25,14 +25,14 @@ app.get("/tarefas", (req, res) => {
 app.post("/addtarefa", (req, res) => {
   const { titulo, descricao, status, categoriaId } = req.body;
 
-  if (!titulo || !descricao || !status || !categoriaId) {
+  if (titulo || descricao || status || categoriaId) {
   Tarefas.create({
     titulo,
     descricao,
     status,
     categoriaId
   }).then(() => {
-    res.redirect("/tarefas");
+    res.status(201).json({ message: "Tarefa criada com sucesso" });
   });
   } else{
     res.status(400).json({ message: "Todos os campos são obrigatórios" });
