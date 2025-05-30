@@ -2,6 +2,15 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const cors = require("cors");
+const connection = require("./database/Conexao");
+const Tarefas = require("./database/Tarefas");
+
+connection.authenticate().then(() => {
+  console.log("Conexão com o banco de dados realizada com sucesso!");
+}).catch((error) => {
+  console.log("Erro ao conectar com o banco de dados: ", error);
+});
+
 
 app.use(cors());
 app.use(express.json());
