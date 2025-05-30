@@ -16,6 +16,10 @@ app.use(cors());
 app.use(express.json());
 
 
+// ==============================
+// Rotas para as tarefas
+// ==============================
+
 app.get("/tarefas", (req, res) => {
   Tarefas.findAll().then((tarefas) => {
     res.json(tarefas);
@@ -60,16 +64,21 @@ app.put("/atualizartarefa/:id", (req, res) => {
   
 });
 
-app.delete("/tasks/:id", (req, res) => {
+app.delete("/apagartarefa/:id", (req, res) => {
   const { id } = req.params;
-  taskExist = tasks.find(t => t.id === parseInt(id));
-  if (!taskExist) {
-    res.status(404).json({ message: "Tarefa não encontrada" });
-  } else {
-    tasks = tasks.filter(t => t.id !== parseInt(id));
-    res.status(200).send({ message: "Deletada com sucesso" });
-  }
+  Tarefas.findByPk(id).then((tarefa) => {
+    if (tarefa) {
+      tarefa.destroy();
+      res.status(200).json({ message: "Tarefa deletada com sucesso" });
+    } else {
+      res.status(404).json({ message: "Tarefa não encontrada" });
+    }
+  });
 });
+
+// ==============================
+// Rotas para as categorias
+// ==============================
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
