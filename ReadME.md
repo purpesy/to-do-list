@@ -61,7 +61,7 @@ npm install
 4. Execute o projeto:
 
 ```bash
-node index.js
+npm run dev
 ```
 
 ---
