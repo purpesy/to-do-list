@@ -2,58 +2,151 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const cors = require("cors");
+const connection = require("./database/Conexao");
 
+// Importação dos models
+const Tarefas = require("./database/Tarefas");
+const Categoria = require("./database/Categoria");
+
+// Configuração de relação
+Categoria.hasMany(Tarefas, { foreignKey: "categoriaId" });
+Tarefas.belongsTo(Categoria, { foreignKey: "categoriaId" });
+
+// Conexão com o banco de dados
+connection.authenticate().then(() => {
+  console.log("Conexão com o banco de dados realizada com sucesso!");
+}).catch((error) => {
+  console.log("Erro ao conectar com o banco de dados: ", error);
+});
+
+// Configuração do express
 app.use(cors());
 app.use(express.json());
 
-let tasks = [
-  { id: 1, title: "Estudar Node.js", completed: false },
-  { id: 2, title: "Fazer To-Do List", completed: true },
-];
 
-app.get("/tasks", (req, res) => {
-  res.json(tasks);
+// ==============================
+// Rotas para as tarefas
+// ==============================
+
+// Busca todas as tarefas com as categorias
+app.get("/tarefas", (req, res) => {
+  Tarefas.findAll({ include: Categoria }).then((tarefas) => {
+    res.json(tarefas);
+  });
 });
 
-app.post("/tasks", (req, res) => {
-  const { title } = req.body;
-  if (!title) {
-    res.status(404).json({ message: "Titulo nao pode estar vazio." });
+// Cria uma nova tarefa
+app.post("/addtarefa", (req, res) => {
+  const { titulo, descricao, status, categoriaId } = req.body;
+
+  if (titulo && descricao && status && categoriaId) {
+    Tarefas.create({
+      titulo,
+      descricao,
+      status,
+      categoriaId
+    }).then(() => {
+      res.status(201).json({ message: "Tarefa criada com sucesso" });
+    });
   } else {
-    const newTask = {
-      id: tasks.length + 1,
-      title,
-      completed: false,
-    };
-    tasks.push(newTask);
-    res.status(201).json(newTask);
+    res.status(400).json({ message: "Todos os campos são obrigatórios" });
   }
 });
 
-app.put("/tasks/:id", (req, res) => {
+// Atualiza uma tarefa existente
+app.put("/atualizartarefa/:id", (req, res) => {
   const { id } = req.params;
-  const { title, completed } = req.body;
-  const task = tasks.find((t) => t.id === parseInt(id));
+  const { titulo, descricao, status, categoriaId } = req.body;
 
-  if (task) {
-    if (completed != undefined) task.completed = completed;
-    if (title) task.title = title;
-    res.json(task);
+  if (titulo && descricao && status && categoriaId) {
+    Tarefas.update({
+      titulo,
+      descricao,
+      status,
+      categoriaId
+    }, {
+      where: { id: id }
+    }).then(() => {
+      res.status(200).json({ message: "Tarefa atualizada com sucesso" });
+    })
   } else {
-    res.status(404).json({ message: "Task not found" });
-  }
-});
-
-app.delete("/tasks/:id", (req, res) => {
-  const { id } = req.params;
-  taskExist = tasks.find(t => t.id === parseInt(id));
-  if (!taskExist) {
     res.status(404).json({ message: "Tarefa não encontrada" });
+  }
+
+});
+
+// Deleta uma tarefa existente
+app.delete("/apagartarefa/:id", (req, res) => {
+  const { id } = req.params;
+  Tarefas.findByPk(id).then((tarefa) => {
+    if (tarefa) {
+      tarefa.destroy().then(() => {
+        res.status(200).json({ message: "Tarefa deletada com sucesso" });
+      });
+    } else {
+      res.status(404).json({ message: "Tarefa não encontrada" });
+    }
+  });
+});
+
+// ==============================
+// Rotas para as categorias
+// ==============================
+
+// Busca todas as categorias
+app.get("/categorias", (req, res) => {
+  Categoria.findAll().then((categorias) => {
+    res.json(categorias);
+  });
+});
+
+// Cria uma nova categoria
+app.post("/addcategoria", (req, res) => {
+  const { nomeCategoria } = req.body;
+
+  if (nomeCategoria) {
+    Categoria.create({
+      nomeCategoria
+    }).then(() => {
+      res.status(201).json({ message: "Categoria criada com sucesso" });
+    });
   } else {
-    tasks = tasks.filter(t => t.id !== parseInt(id));
-    res.status(200).send({ message: "Deletada com sucesso" });
+    res.status(400).json({ message: "Todos os campos são obrigatórios" });
   }
 });
+
+// Atualiza uma categoria existente
+app.put("/atualizarcategoria/:id", (req, res) => {
+  const { id } = req.params;
+  const { nomeCategoria } = req.body;
+
+  if (nomeCategoria) {
+    Categoria.update({
+      nomeCategoria
+    }, {
+      where: { id: id }
+    }).then(() => {
+      res.status(200).json({ message: "Categoria atualizada com sucesso" });
+    })
+  } else {
+    res.status(404).json({ message: "Categoria não encontrada" });
+  }
+});
+
+// Deleta uma categoria existente
+app.delete("/apagarcategoria/:id", (req, res) => {
+  const { id } = req.params;
+  Categoria.findByPk(id).then((categoria) => {
+    if (categoria) {
+      categoria.destroy().then(() => {
+        res.status(200).json({ message: "Categoria deletada com sucesso" });
+      });
+    } else {
+      res.status(404).json({ message: "Categoria não encontrada" });
+    }
+  });
+});
+
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
