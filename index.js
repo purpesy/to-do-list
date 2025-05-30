@@ -12,31 +12,30 @@ connection.authenticate().then(() => {
   console.log("Erro ao conectar com o banco de dados: ", error);
 });
 
-
 app.use(cors());
 app.use(express.json());
 
-let tasks = [
-  { id: 1, title: "Estudar Node.js", completed: false },
-  { id: 2, title: "Fazer To-Do List", completed: true },
-];
 
-app.get("/tasks", (req, res) => {
-  res.json(tasks);
+app.get("/tarefas", (req, res) => {
+  Tarefas.findAll().then((tarefas) => {
+    res.json(tarefas);
+  });
 });
 
-app.post("/tasks", (req, res) => {
-  const { title } = req.body;
-  if (!title) {
-    res.status(404).json({ message: "Titulo nao pode estar vazio." });
-  } else {
-    const newTask = {
-      id: tasks.length + 1,
-      title,
-      completed: false,
-    };
-    tasks.push(newTask);
-    res.status(201).json(newTask);
+app.post("/addtarefa", (req, res) => {
+  const { titulo, descricao, status, categoriaId } = req.body;
+
+  if (!titulo || !descricao || !status || !categoriaId) {
+  Tarefas.create({
+    titulo,
+    descricao,
+    status,
+    categoriaId
+  }).then(() => {
+    res.redirect("/tarefas");
+  });
+  } else{
+    res.status(400).json({ message: "Todos os campos são obrigatórios" });
   }
 });
 
